@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Museo Virtual del Péndulo</title>
+
+  <!-- MathJax para ecuaciones LaTeX -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        packages: {'[+]': ['ams']}
+      },
+      options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@300;400&family=Raleway:wght@200;300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --cream: #F5F0E8;
+      --dark: #1A1714;
+      --gold: #B8955A;
+      --gold-light: #D4B07A;
+      --copper: #8B5E3C;
+      --text: #2C2820;
+      --text-muted: #6B5F50;
+      --line: rgba(184,149,90,0.25);
+      --section-bg: #FDFAF4;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--cream);
+      color: var(--text);
+      font-family: 'Raleway', sans-serif;
+      font-weight: 300;
+      line-height: 1.8;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      background: var(--dark);
+      padding: 2rem;
+    }
+
+    .pendulum-svg {
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      opacity: 0.12;
+      pointer-events: none;
+    }
+
+    .pendulum-bob {
+      transform-origin: 350px 0px;
+      animation: swing 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes swing {
+      from { transform: rotate(-22deg); }
+      to   { transform: rotate( 22deg); }
+    }
+
+    .hero-content {
+      position: relative;
+      text-align: center;
+      z-index: 2;
+    }
+
+    .museum-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.4em;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+    }
+
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3rem, 9vw, 7rem);
+      font-weight: 300;
+      color: var(--cream);
+      line-height: 1.05;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-title em {
+      font-style: italic;
+      color: var(--gold-light);
+    }
+
+    .hero-subtitle {
+      font-size: 0.9rem;
+      letter-spacing: 0.15em;
+      color: rgba(245,240,232,0.5);
+      max-width: 480px;
+      margin: 0 auto 3rem;
+    }
+
+    .hero-nav {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .nav-pill {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      border: 1px solid rgba(184,149,90,0.4);
+      padding: 0.6rem 1.4rem;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+
+    .nav-pill:hover {
+      background: rgba(184,149,90,0.12);
+      border-color: var(--gold);
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: rgba(245,240,232,0.3);
+      font-family: 'DM Mono', monospace;
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, rgba(184,149,90,0.6), transparent);
+      animation: scrolldown 2s ease-in-out infinite;
+    }
+
+    @keyframes scrolldown {
+      0%,100% { opacity: 0.3; transform: scaleY(1); }
+      50%      { opacity: 1;   transform: scaleY(1.2); }
+    }
+
+    /* ── SECTIONS ── */
+    section {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 6rem 2rem;
+    }
+
+    .section-tag {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 300;
+      line-height: 1.15;
+      margin-bottom: 2rem;
+      color: var(--text);
+    }
+
+    .section-title em { font-style: italic; color: var(--copper); }
+
+    .divider {
+      width: 60px;
+      height: 1px;
+      background: var(--gold);
+      margin: 2rem 0;
+      opacity: 0.6;
+    }
+
+    p + p { margin-top: 1.2rem; }
+
+    /* ── SEPARADOR FULL-WIDTH ── */
+    .full-divider {
+      width: 100%;
+      height: 1px;
+      background: var(--line);
+    }
+
+    /* ── ANIMACIÓN VIDEO ── */
+    .video-section {
+      background: var(--dark);
+      padding: 6rem 2rem;
+    }
+
+    .video-inner {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .video-inner .section-tag { color: var(--gold); }
+    .video-inner .section-title { color: var(--cream); }
+    .video-inner .divider { opacity: 0.4; }
+    .video-inner p { color: rgba(245,240,232,0.65); }
+
+    .video-container {
+      margin: 3rem 0;
+      border: 1px solid rgba(184,149,90,0.3);
+      position: relative;
+      background: #0D0C0A;
+    }
+
+    .video-container video {
+      width: 100%;
+      display: block;
+      max-height: 520px;
+      object-fit: contain;
+    }
+
+    .video-caption {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      color: rgba(184,149,90,0.6);
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .download-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+
+    .dl-btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      border: 1px solid rgba(184,149,90,0.5);
+      padding: 0.7rem 1.5rem;
+      text-decoration: none;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .dl-btn:hover { background: rgba(184,149,90,0.12); border-color: var(--gold); }
+
+    /* ── ECUACIONES ── */
+    .eq-block {
+      background: var(--section-bg);
+      border-left: 2px solid var(--gold);
+      padding: 1.5rem 2rem;
+      margin: 2.5rem 0;
+      overflow-x: auto;
+    }
+
+    .eq-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.8rem;
+    }
+
+    .eq-block .MJX-TEX { color: var(--text); }
+
+    /* ── GRID CONCEPTOS ── */
+    .concepts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 2px;
+      margin: 3rem 0;
+      background: var(--line);
+    }
+
+    .concept-card {
+      background: var(--section-bg);
+      padding: 2rem 1.5rem;
+    }
+
+    .concept-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 3rem;
+      font-weight: 300;
+      color: rgba(184,149,90,0.2);
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .concept-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-bottom: 0.8rem;
+    }
+
+    .concept-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    /* ── FENOMENOLOGÍA ── */
+    .pheno-section {
+      background: #1E1A15;
+      padding: 6rem 2rem;
+    }
+
+    .pheno-inner { max-width: 860px; margin: 0 auto; }
+    .pheno-inner .section-tag { color: var(--gold); }
+    .pheno-inner .section-title { color: var(--cream); }
+    .pheno-inner .divider { opacity: 0.4; }
+    .pheno-inner p { color: rgba(245,240,232,0.65); }
+    .pheno-inner .eq-block { background: rgba(255,255,255,0.03); border-color: var(--gold); }
+
+    blockquote {
+      border-left: 2px solid var(--gold);
+      padding: 1rem 1.5rem;
+      margin: 2rem 0;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      font-style: italic;
+      color: var(--gold-light);
+      line-height: 1.6;
+    }
+
+    blockquote cite {
+      display: block;
+      margin-top: 0.8rem;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      font-style: normal;
+      letter-spacing: 0.2em;
+      opacity: 0.6;
+    }
+
+    /* ── TIMELINE CASCADA ── */
+    .timeline {
+      position: relative;
+      margin: 3rem 0;
+      padding-left: 2rem;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 1px;
+      background: linear-gradient(to bottom, var(--gold) 0%, rgba(184,149,90,0.1) 100%);
+    }
+
+    .tl-item {
+      position: relative;
+      margin-bottom: 2.5rem;
+    }
+
+    .tl-dot {
+      position: absolute;
+      left: -2.4rem;
+      top: 0.35rem;
+      width: 8px;
+      height: 8px;
+      border: 1px solid var(--gold);
+      background: var(--cream);
+      border-radius: 50%;
+    }
+
+    .tl-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      color: var(--gold);
+      margin-bottom: 0.4rem;
+    }
+
+    .tl-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+      font-weight: 400;
+      margin-bottom: 0.5rem;
+    }
+
+    .tl-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--dark);
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+
+    footer .museum-label { margin-bottom: 1rem; }
+
+    .footer-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem;
+      font-weight: 300;
+      color: var(--cream);
+      margin-bottom: 1.5rem;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 3rem;
+    }
+
+    .footer-links a {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(184,149,90,0.6);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-links a:hover { color: var(--gold); }
+
+    .footer-copy {
+      font-size: 0.75rem;
+      color: rgba(245,240,232,0.2);
+      font-family: 'DM Mono', monospace;
+      letter-spacing: 0.1em;
+    }
+
+    /* ── SIMULADOR INTERACTIVO ── */
+    .sim-wrapper {
+      border: 1px solid var(--line);
+      padding: 1.5rem;
+      margin: 3rem 0;
+      background: var(--section-bg);
+    }
+
+    .sim-controls {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+
+    .sim-ctrl { flex: 1; min-width: 160px; }
+
+    .sim-ctrl label {
+      display: block;
+      font-family: 'DM Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    .sim-ctrl input[type=range] {
+      width: 100%;
+      accent-color: var(--gold);
+    }
+
+    .sim-val {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--gold);
+    }
+
+    canvas#pendCanvas {
+      display: block;
+      width: 100%;
+      height: 280px;
+      background: #0D0C0A;
+    }
+
+    @media (max-width: 600px) {
+      .concepts-grid { grid-template-columns: 1fr; }
+      .download-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════ HERO ══════════════════════════════ -->
+<div class="hero">
+  <!-- Péndulo decorativo de fondo -->
+  <svg class="pendulum-svg" width="700" height="700" viewBox="0 0 700 700" fill="none">
+    <line x1="350" y1="0" x2="350" y2="520" stroke="#B8955A" stroke-width="1"/>
+    <g class="pendulum-bob">
+      <circle cx="350" cy="540" r="28" stroke="#B8955A" stroke-width="1" fill="none"/>
+      <circle cx="350" cy="540" r="6"  fill="#B8955A" opacity="0.5"/>
+    </g>
+  </svg>
+
+  <div class="hero-content">
+    <p class="museum-label">Museo Virtual &nbsp;·&nbsp; Física &amp; Fenomenología</p>
+    <h1 class="hero-title">El <em>Péndulo</em><br>en Cascada</h1>
+    <p class="hero-subtitle">Un recorrido por la física, la matemática y la experiencia del movimiento oscilatorio — diecisiete masas, un fenómeno</p>
+    <nav class="hero-nav">
+      <a href="#fisica" class="nav-pill">Física</a>
+      <a href="#matematica" class="nav-pill">Matemática</a>
+      <a href="#animacion" class="nav-pill">Animación</a>
+      <a href="#fenomenologia" class="nav-pill">Fenomenología</a>
+    </nav>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span>Descender</span>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ FÍSICA ══════════════════════════════ -->
+<div class="full-divider"></div>
+<section id="fisica">
+  <p class="section-tag">I &nbsp;—&nbsp; Física</p>
+  <h2 class="section-title">El movimiento<br>del <em>péndulo simple</em></h2>
+  <div class="divider"></div>
+
+  <p>Un péndulo simple consiste en una masa puntual suspendida de un hilo inextensible de longitud $L$. Bajo la acción de la gravedad, oscila alrededor de su posición de equilibrio con un movimiento que, para ángulos pequeños, es <strong>armónico simple</strong>.</p>
+
+  <div class="eq-block">
+    <p class="eq-label">Ecuación de movimiento — ángulo pequeño</p>
+    $$\ddot{\theta} + \frac{g}{L}\,\theta = 0$$
+  </div>
+
+  <p>donde $\theta$ es el ángulo de desplazamiento, $g$ la aceleración gravitacional y $L$ la longitud del péndulo. La solución general es:</p>
+
+  <div class="eq-block">
+    <p class="eq-label">Solución general</p>
+    $$\theta(t) = \theta_0 \cos\!\left(\omega_0 t + \varphi\right), \qquad \omega_0 = \sqrt{\frac{g}{L}}$$
+  </div>
+
+  <p>El período de oscilación, notable por su <em>independencia de la masa</em>, es:</p>
+
+  <div class="eq-block">
+    <p class="eq-label">Período de oscilación (Huygens, 1673)</p>
+    $$T = 2\pi\sqrt{\frac{L}{g}}$$
+  </div>
+
+  <p>Para ángulos grandes, la ecuación no linealizada involucra una integral elíptica de primera especie:</p>
+
+  <div class="eq-block">
+    <p class="eq-label">Período exacto — ángulos grandes</p>
+    $$T = 4\sqrt{\frac{L}{g}}\;\int_0^{\pi/2} \frac{d\phi}{\sqrt{1 - k^2\sin^2\phi}}\,, \quad k = \sin\!\left(\frac{\theta_0}{2}\right)$$
+  </div>
+
+  <!-- ── Simulador ── -->
+  <div class="sim-wrapper">
+    <div class="sim-controls">
+      <div class="sim-ctrl">
+        <label>Longitud L (m) &nbsp;<span class="sim-val" id="valL">1.0</span></label>
+        <input type="range" id="slL" min="0.3" max="2.5" step="0.05" value="1.0"/>
+      </div>
+      <div class="sim-ctrl">
+        <label>Ángulo inicial θ₀ (°) &nbsp;<span class="sim-val" id="valT">15</span></label>
+        <input type="range" id="slT" min="5" max="60" step="1" value="15"/>
+      </div>
+      <div class="sim-ctrl">
+        <label>g (m/s²) &nbsp;<span class="sim-val" id="valG">9.81</span></label>
+        <input type="range" id="slG" min="1.6" max="25" step="0.1" value="9.81"/>
+      </div>
+    </div>
+    <canvas id="pendCanvas"></canvas>
+    <p style="font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;color:var(--text-muted);margin-top:1rem;text-align:center;">
+      Período: <span id="periodo">2.01</span> s &nbsp;·&nbsp; Frecuencia: <span id="freq">0.50</span> Hz
+    </p>
+  </div>
+
+  <!-- Conceptos -->
+  <div class="concepts-grid">
+    <div class="concept-card">
+      <p class="concept-num">01</p>
+      <p class="concept-name">Isocronismo</p>
+      <p class="concept-desc">Para ángulos pequeños, el período es independiente de la amplitud. Propiedad descubierta por Galileo (~1602).</p>
+    </div>
+    <div class="concept-card">
+      <p class="concept-num">02</p>
+      <p class="concept-name">Energía</p>
+      <p class="concept-desc">La energía total $E = \frac{1}{2}mL^2\dot\theta^2 + mgL(1-\cos\theta)$ se conserva en ausencia de amortiguamiento.</p>
+    </div>
+    <div class="concept-card">
+      <p class="concept-num">03</p>
+      <p class="concept-name">Caos</p>
+      <p class="concept-desc">El péndulo doble exhibe sensibilidad extrema a las condiciones iniciales — comportamiento caótico determinista.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ MATEMÁTICA ══════════════════════════════ -->
+<div class="full-divider"></div>
+<section id="matematica">
+  <p class="section-tag">II &nbsp;—&nbsp; Matemática</p>
+  <h2 class="section-title">Espacio de fases<br>y <em>simetría</em></h2>
+  <div class="divider"></div>
+
+  <p>El péndulo es uno de los sistemas dinámicos más estudiados de la historia. Su riqueza matemática emerge de la transición entre régimen lineal y no lineal, y de la geometría de su espacio de fases.</p>
+
+  <div class="eq-block">
+    <p class="eq-label">Sistema autónomo en el espacio de fases</p>
+    $$\dot{\theta} = \omega, \qquad \dot{\omega} = -\frac{g}{L}\sin\theta$$
+  </div>
+
+  <p>En el espacio de fases $(\theta, \dot\theta)$, las trayectorias son curvas de nivel de la energía. Para $E &lt; 2mgL$ el sistema oscila (trayectorias cerradas); para $E \geq 2mgL$ rota continuamente.</p>
+
+  <div class="eq-block">
+    <p class="eq-label">Hamiltoniano del péndulo simple</p>
+    $$H(\theta,\,p) = \frac{p^2}{2mL^2} + mgL\,(1 - \cos\theta)$$
+  </div>
+
+  <p>El sistema de <strong>17 péndulos en cascada</strong> de la animación explota el hecho de que péndulos con longitudes ligeramente distintas tienen períodos distintos. Si se eligen las longitudes según la fórmula:</p>
+
+  <div class="eq-block">
+    <p class="eq-label">Longitudes para N oscilaciones en T segundos</p>
+    $$L_k = \frac{g\,T^2}{4\pi^2}\cdot\frac{1}{\left(n_0 + k\right)^2}, \qquad k = 1,2,\ldots,17$$
+  </div>
+
+  <p>donde $n_0$ es el número de oscilaciones del péndulo más corto en el intervalo $T$, se obtienen patrones de interferencia constructiva y destructiva — las formas de onda, espirales y cascadas que aparecen en la animación.</p>
+
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <p class="tl-label">Galileo · 1602</p>
+      <p class="tl-title">Isocronismo descubierto</p>
+      <p class="tl-desc">Observando lámparas en la catedral de Pisa, Galileo nota que el período no depende de la amplitud.</p>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <p class="tl-label">Huygens · 1673</p>
+      <p class="tl-title">Horologium Oscillatorium</p>
+      <p class="tl-desc">Derivación formal del período $T = 2\pi\sqrt{L/g}$ y primer reloj de péndulo preciso.</p>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <p class="tl-label">Foucault · 1851</p>
+      <p class="tl-title">Rotación de la Tierra</p>
+      <p class="tl-desc">El péndulo de Foucault en el Panteón de París demuestra la rotación terrestre visualmente.</p>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <p class="tl-label">Lorenz · 1963</p>
+      <p class="tl-title">Caos determinista</p>
+      <p class="tl-desc">El péndulo doble se convierte en arquetipo del caos — sensibilidad exponencial a condiciones iniciales.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ ANIMACIÓN ══════════════════════════════ -->
+<div class="video-section" id="animacion">
+  <div class="video-inner">
+    <p class="section-tag">III &nbsp;—&nbsp; Animación</p>
+    <h2 class="section-title">17 masas<br>en <em>cascada</em></h2>
+    <div class="divider"></div>
+
+    <p>La animación fue creada en Blender y muestra el fenómeno de <em>péndulos de analemma</em>: diecisiete péndulos con longitudes calculadas para oscilar entre $n$ y $n+16$ ciclos completos en el mismo intervalo de tiempo. El resultado visual es una danza de patrones que emergen y colapsan periódicamente.</p>
+
+    <div class="video-container">
+      <video controls preload="metadata" poster="">
+        <source src="00-0359.mp4" type="video/mp4" />
+        <p style="color:rgba(245,240,232,0.5);padding:2rem;text-align:center;font-family:'DM Mono',monospace;font-size:0.8rem;">
+          Tu navegador no soporta video HTML5.<br>
+          <a href="00-0359.mp4" style="color:var(--gold);">Descargar el video</a>
+        </p>
+      </video>
+    </div>
+    <p class="video-caption">Simulación de 17 péndulos en cascada — Blender 4.x · 2024</p>
+
+    <div class="download-row">
+      <a href="00-0359.mp4" download class="dl-btn">⬇ Descargar MP4</a>
+      <a href="anim22.blend" download class="dl-btn">⬇ Descargar archivo .blend</a>
+    </div>
+
+    <p style="margin-top:2rem;">Los patrones que emergen incluyen: una ola sinusoidal, una espiral, una figura ocho y el regreso sincrónico de todos los péndulos a su posición inicial. Este ciclo completo tarda exactamente el intervalo $T$ elegido en el diseño.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ FENOMENOLOGÍA ══════════════════════════════ -->
+<div class="pheno-section" id="fenomenologia">
+  <div class="pheno-inner">
+    <p class="section-tag">IV &nbsp;—&nbsp; Fenomenología</p>
+    <h2 class="section-title">La experiencia<br>del <em>movimiento</em></h2>
+    <div class="divider"></div>
+
+    <p style="color:rgba(245,240,232,0.65);">La fenomenología — en el sentido de Husserl y Merleau-Ponty — no pregunta qué <em>es</em> el péndulo, sino cómo se <em>da</em> a la conciencia. El movimiento oscilatorio es uno de los fenómenos más arcaicos de la experiencia humana del tiempo.</p>
+
+    <blockquote>
+      "El péndulo no mide el tiempo. <em>Es</em> el tiempo haciéndose visible."
+      <cite>— Paráfrasis libre de Gaston Bachelard, <em>La Intuición del Instante</em>, 1932</cite>
+    </blockquote>
+
+    <p style="color:rgba(245,240,232,0.65);">Tres dimensiones fenomenológicas del péndulo en cascada:</p>
+
+    <div class="eq-block" style="background:rgba(255,255,255,0.03);border-color:var(--gold);margin:2rem 0;">
+      <p class="eq-label" style="color:rgba(184,149,90,0.7);">Temporalidad</p>
+      <p style="color:rgba(245,240,232,0.65);font-size:0.9rem;">El sistema oscila entre orden y desorden con periodicidad exacta. Cada ciclo es idéntico y, sin embargo, la experiencia de <em>ver</em> cómo el orden se disuelve en caos aparente y regresa no se agota en la repetición. El tiempo vivido y el tiempo físico divergen.</p>
+    </div>
+
+    <div class="eq-block" style="background:rgba(255,255,255,0.03);border-color:var(--gold);margin:2rem 0;">
+      <p class="eq-label" style="color:rgba(184,149,90,0.7);">Intersubjetividad</p>
+      <p style="color:rgba(245,240,232,0.65);font-size:0.9rem;">El movimiento de un péndulo evoca en el observador una resonancia corporal: el cuerpo propio tiende a oscilar. Merleau-Ponty llamaría a esto <em>esquema corporal compartido</em>. Los 17 péndulos crean una coreografía que el cuerpo lee antes de que la mente calcule.</p>
+    </div>
+
+    <div class="eq-block" style="background:rgba(255,255,255,0.03);border-color:var(--gold);margin:2rem 0;">
+      <p class="eq-label" style="color:rgba(184,149,90,0.7);">Lo sublime matemático</p>
+      <p style="color:rgba(245,240,232,0.65);font-size:0.9rem;">El momento en que los 17 péndulos se alinean simultáneamente — un evento de probabilidad uno pero que se percibe como milagro — ilustra la tensión entre la necesidad lógica de la matemática y la contingencia de la experiencia. Kant llamaría a esto <em>lo sublime matemático</em>: el placer de la razón al superar lo sensible.</p>
+    </div>
+
+    <p style="color:rgba(245,240,232,0.65);">El péndulo ha servido como objeto liminar en la historia de la ciencia: entre la mecánica y la relatividad (el experimento de Foucault implica la rotación terrestre), entre el determinismo y el caos (el péndulo doble), y ahora entre la física y el arte computacional.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════ FOOTER ══════════════════════════════ -->
+<footer>
+  <p class="museum-label">Museo Virtual del Péndulo</p>
+  <p class="footer-title">El movimiento que nunca se detiene</p>
+  <nav class="footer-links">
+    <a href="#fisica">Física</a>
+    <a href="#matematica">Matemática</a>
+    <a href="#animacion">Animación</a>
+    <a href="#fenomenologia">Fenomenología</a>
+    <a href="anim22.blend" download>Archivo .blend</a>
+    <a href="00-0359.mp4" download>Video MP4</a>
+  </nav>
+  <p class="footer-copy">Creado con Blender · MathJax · HTML · CSS · JavaScript</p>
+</footer>
+
+<!-- ══════════════════════════════ SCRIPTS ══════════════════════════════ -->
+<script>
+  /* ── Simulador de péndulo ── */
+  const canvas = document.getElementById('pendCanvas');
+  const ctx    = canvas.getContext('2d');
+  const slL    = document.getElementById('slL');
+  const slT    = document.getElementById('slT');
+  const slG    = document.getElementById('slG');
+  const valL   = document.getElementById('valL');
+  const valT   = document.getElementById('valT');
+  const valG   = document.getElementById('valG');
+  const pEl    = document.getElementById('periodo');
+  const fEl    = document.getElementById('freq');
+
+  let L = 1.0, theta0 = 15 * Math.PI/180, g = 9.81;
+  let t = 0, raf;
+
+  function resize() {
+    canvas.width  = canvas.offsetWidth  * devicePixelRatio;
+    canvas.height = canvas.offsetHeight * devicePixelRatio;
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+  }
+
+  function updateParams() {
+    L      = parseFloat(slL.value);
+    theta0 = parseFloat(slT.value) * Math.PI/180;
+    g      = parseFloat(slG.value);
+    valL.textContent = L.toFixed(2);
+    valT.textContent = slT.value;
+    valG.textContent = parseFloat(slG.value).toFixed(2);
+    const T = 2*Math.PI*Math.sqrt(L/g);
+    pEl.textContent = T.toFixed(3);
+    fEl.textContent = (1/T).toFixed(3);
+  }
+
+  function draw(ts) {
+    t = ts / 1000;
+    const w  = canvas.offsetWidth;
+    const h  = canvas.offsetHeight;
+    const ox = w/2, oy = 20;
+    const scale = Math.min(w, h*1.8) * 0.38;
+    const omega = Math.sqrt(g/L);
+    const angle = theta0 * Math.cos(omega * t);
+    const bx = ox + Math.sin(angle) * scale;
+    const by = oy + Math.cos(angle) * scale;
+
+    ctx.clearRect(0,0,w,h);
+
+    /* rod */
+    ctx.beginPath();
+    ctx.moveTo(ox, oy);
+    ctx.lineTo(bx, by);
+    ctx.strokeStyle = 'rgba(184,149,90,0.7)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    /* pivot */
+    ctx.beginPath();
+    ctx.arc(ox, oy, 4, 0, Math.PI*2);
+    ctx.fillStyle = '#B8955A';
+    ctx.fill();
+
+    /* bob */
+    ctx.beginPath();
+    ctx.arc(bx, by, 14, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(184,149,90,0.15)';
+    ctx.strokeStyle = '#B8955A';
+    ctx.lineWidth = 1;
+    ctx.fill();
+    ctx.stroke();
+
+    raf = requestAnimationFrame(draw);
+  }
+
+  [slL, slT, slG].forEach(s => s.addEventListener('input', () => {
+    updateParams();
+  }));
+
+  window.addEventListener('resize', resize);
+  resize();
+  updateParams();
+  raf = requestAnimationFrame(draw);
+
+  /* ── Animación entrada secciones ── */
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('section, .video-section, .pheno-section').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(24px)';
+    el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
